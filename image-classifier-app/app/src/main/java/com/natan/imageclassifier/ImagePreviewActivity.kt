@@ -2,6 +2,7 @@ package com.natan.imageclassifier
 
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
@@ -14,16 +15,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.launch
 
 class ImagePreviewActivity : ComponentActivity() {
+    private var imageUri: Uri? = null
+    private var source: String = "unknown"
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         val imageUriString = intent.getStringExtra("image_uri")
-        val imageUri = imageUriString?.let { Uri.parse(it) }
-        val source = intent.getStringExtra("source") ?: "unknown"
+        imageUri = imageUriString?.let { Uri.parse(it) }
+        source = intent.getStringExtra("source") ?: "unknown"
         
         setContent {
             ImagePreviewScreen(
@@ -36,13 +42,41 @@ class ImagePreviewActivity : ComponentActivity() {
     }
     
     private fun acceptImage() {
-        // For now, nothing happens with the accepted image
-        // You can add your image processing logic here later
-        finish()
+        imageUri?.let { uri ->
+            lifecycleScope.launch {
+                try {
+                    val result = ImageUploader.uploadImage(this@ImagePreviewActivity, uri)
+                    result.fold(
+                        onSuccess = { uploadResponse ->
+                            Toast.makeText(
+                                this@ImagePreviewActivity,
+                                "Image uploaded successfully: ${uploadResponse.filename}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            finish()
+                        },
+                        onFailure = { exception ->
+                            Toast.makeText(
+                                this@ImagePreviewActivity,
+                                "Upload failed: ${exception.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    )
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@ImagePreviewActivity,
+                        "Error: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        } ?: run {
+            Toast.makeText(this, "No image to upload", Toast.LENGTH_SHORT).show()
+        }
     }
     
     private fun rejectImage() {
-        // For now, just go back to previous screen
         finish()
     }
 }
@@ -54,6 +88,8 @@ fun ImagePreviewScreen(
     onAccept: () -> Unit,
     onReject: () -> Unit
 ) {
+    var isUploading by remember { mutableStateOf(false) }
+    
     MaterialTheme {
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -130,7 +166,8 @@ fun ImagePreviewScreen(
                             .height(56.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error
-                        )
+                        ),
+                        enabled = !isUploading
                     ) {
                         Text(
                             text = "Reject",
@@ -139,15 +176,26 @@ fun ImagePreviewScreen(
                     }
                     
                     Button(
-                        onClick = onAccept,
+                        onClick = {
+                            isUploading = true
+                            onAccept()
+                        },
                         modifier = Modifier
                             .weight(1f)
-                            .height(56.dp)
+                            .height(56.dp),
+                        enabled = !isUploading
                     ) {
-                        Text(
-                            text = "Accept",
-                            fontSize = 16.sp
-                        )
+                        if (isUploading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Text(
+                                text = "Upload",
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 }
                 
