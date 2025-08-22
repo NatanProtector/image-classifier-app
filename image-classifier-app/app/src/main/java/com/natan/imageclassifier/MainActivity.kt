@@ -29,11 +29,11 @@ class MainActivity : ComponentActivity() {
     ) { isGranted: Boolean ->
         if (isGranted) {
             // Permission granted, can proceed with camera
-            takePhoto()
+            openCamera()
         }
     }
 
-    private val cameraLauncher = registerForActivityResult(
+    private val takePictureLauncher = registerForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
@@ -44,8 +44,10 @@ class MainActivity : ComponentActivity() {
                     "${packageName}.fileprovider",
                     file
                 )
+                // Launch image preview activity with the captured image
                 val intent = Intent(this, ImagePreviewActivity::class.java).apply {
                     putExtra("image_uri", photoUri.toString())
+                    putExtra("source", "camera")
                 }
                 startActivity(intent)
             }
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
             // Launch image preview activity
             val intent = Intent(this, ImagePreviewActivity::class.java).apply {
                 putExtra("image_uri", selectedImageUri.toString())
+                putExtra("source", "gallery")
             }
             startActivity(intent)
         }
@@ -68,22 +71,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MainScreen(
-                onTakeImageClick = { openCamera() },
+                onTakeImageClick = { checkCameraPermissionAndOpen() },
                 onUploadImageClick = { openGallery() }
             )
         }
     }
 
-    private fun openCamera() {
+    private fun checkCameraPermissionAndOpen() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
             == PackageManager.PERMISSION_GRANTED) {
-            takePhoto()
+            openCamera()
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
-    private fun takePhoto() {
+    private fun openCamera() {
         createImageFile()
         photoFile?.let { file ->
             val photoUri = FileProvider.getUriForFile(
@@ -91,7 +94,7 @@ class MainActivity : ComponentActivity() {
                 "${packageName}.fileprovider",
                 file
             )
-            cameraLauncher.launch(photoUri)
+            takePictureLauncher.launch(photoUri)
         }
     }
 

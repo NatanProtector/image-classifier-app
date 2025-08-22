@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -24,10 +23,12 @@ class ImagePreviewActivity : ComponentActivity() {
         
         val imageUriString = intent.getStringExtra("image_uri")
         val imageUri = imageUriString?.let { Uri.parse(it) }
+        val source = intent.getStringExtra("source") ?: "unknown"
         
         setContent {
             ImagePreviewScreen(
                 imageUri = imageUri,
+                source = source,
                 onAccept = { acceptImage() },
                 onReject = { rejectImage() }
             )
@@ -37,16 +38,11 @@ class ImagePreviewActivity : ComponentActivity() {
     private fun acceptImage() {
         // For now, nothing happens with the accepted image
         // You can add your image processing logic here later
-        // This could include:
-        // - Saving the image to permanent storage
-        // - Sending to image classification service
-        // - Processing the image for analysis
         finish()
     }
     
     private fun rejectImage() {
         // For now, just go back to previous screen
-        // The temporary file will be cleaned up automatically
         finish()
     }
 }
@@ -54,6 +50,7 @@ class ImagePreviewActivity : ComponentActivity() {
 @Composable
 fun ImagePreviewScreen(
     imageUri: Uri?,
+    source: String,
     onAccept: () -> Unit,
     onReject: () -> Unit
 ) {
@@ -68,19 +65,29 @@ fun ImagePreviewScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = spacedBy(24.dp)
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 
-                Text(
-                    text = "Image Preview",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                // Header with source info
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Image Preview",
+                        fontSize = 24.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Show source information
+                    Text(
+                        text = "Source: ${source.replaceFirstChar { it.uppercase() }}",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 
-                Text(
-                    text = "Review your image before proceeding",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 // Image display
                 imageUri?.let { uri ->
