@@ -2,6 +2,7 @@ import numpy as np
 from PIL import Image
 import os
 import matplotlib.pyplot as plt
+import cv2
 # Image matrix operations
 
 def load_image_as_matrix(image_path):
@@ -77,5 +78,6 @@ def display_image_matrix(image_matrix):
     Args:
         image_matrix (numpy.ndarray): The image matrix to display
     """
-    plt.imshow(image_matrix)
-    plt.show()
+    cv2.imshow("Image", image_matrix)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
