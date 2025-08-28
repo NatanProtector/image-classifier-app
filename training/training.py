@@ -27,7 +27,7 @@ np.random.shuffle(cat_images)
 np.random.shuffle(dog_images)
 np.random.shuffle(other_images)
 
-split_ratio = 0.2
+split_ratio = 0.15
     
 # train test split
 cat_test_images = cat_images[:int(cat_images.shape[0] * split_ratio)]
@@ -61,11 +61,13 @@ print(f"Dog accuracy: {result_dog[1]}")
 result_other = model.evaluate(np.array(other_test_images), np.array(other_test_labels))
 print(f"Other accuracy: {result_other[1]}")
 
+model_name = "model_CNN_1epoch"
+
 # save results
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "results_10epochs.txt"), "w") as f:
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", f"results_{model_name}.txt"), "w") as f:
     f.write(f"Cat accuracy: {result_cat[1]}\n")
     f.write(f"Dog accuracy: {result_dog[1]}\n")
     f.write(f"Other accuracy: {result_other[1]}\n")
 
 # save
-model.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "model_10epochs.keras"))
+model.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", f"{model_name}.keras"))

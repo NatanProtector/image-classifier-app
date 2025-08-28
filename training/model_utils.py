@@ -4,7 +4,7 @@ import tensorflow as tf
 
 # create a CNN model that returns a model object
 # The CNN takes an image matrix as input and retusn a (3,1) vector as output
-# [probabilty of cat, probability of dog, probability of bird]
+# [probabilty of cat, probability of dog, probability of other]
 
 def CreateCNNModel(input_shape):
     model = tf.keras.Sequential([
@@ -18,3 +18,5 @@ def CreateCNNModel(input_shape):
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
+
+

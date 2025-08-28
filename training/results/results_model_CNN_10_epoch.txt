@@ -1,0 +1,11 @@
+Cat accuracy: 0.6499466300010681
+Dog accuracy: 0.28441834449768066
+Other accuracy: 0.9502487778663635
+
+conclusion:
+recognizing an other and dog and cat is too general with the current architecture
+the model just claims eveything is an other
+Idea:
+Create and IsCat model, and a IsDog model
+might be easier to Create
+and claim is not dog and not cat then it is an other
