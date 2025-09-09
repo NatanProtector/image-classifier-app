@@ -79,3 +79,5 @@ print(f"Created not_cats with {len(not_cats_images)} images (other + dogs)")
 # Save the new combined objects
 np.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "processed", "not_dogs_images.npy"), not_dogs_images)
 np.save(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "processed", "not_cats_images.npy"), not_cats_images)
+
+print("done")
