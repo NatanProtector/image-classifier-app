@@ -1,0 +1,10 @@
+Binary Classification Models Gray Results
+========================================
+
+IsDog Model:
+  Test Loss: 0.5603
+  Test Accuracy: 0.7521
+
+IsCat Model:
+  Test Loss: 0.5508
+  Test Accuracy: 0.7605

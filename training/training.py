@@ -1,8 +1,20 @@
 import os
 from model_utils import CreateBinaryModel
 import numpy as np
+import cv2
 
-image_shape = (256, 256, 3)
+image_shape = (256, 256, 1)
+
+def convert_to_grayscale(images):
+    """Convert RGB images to grayscale"""
+    grayscale_images = []
+    for img in images:
+        # Convert from RGB to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        # Add channel dimension to make it (256, 256, 1)
+        gray = np.expand_dims(gray, axis=-1)
+        grayscale_images.append(gray)
+    return np.array(grayscale_images)
 
 print("Loading data for binary classification models...")
 
@@ -11,6 +23,13 @@ cat_images = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "d
 dog_images = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "processed", "dog_images.npy"))
 not_cats_images = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "processed", "not_cats_images.npy"))
 not_dogs_images = np.load(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "processed", "not_dogs_images.npy"))
+
+# Convert all images to grayscale
+print("Converting images to grayscale...")
+cat_images = convert_to_grayscale(cat_images)
+dog_images = convert_to_grayscale(dog_images)
+not_cats_images = convert_to_grayscale(not_cats_images)
+not_dogs_images = convert_to_grayscale(not_dogs_images)
 
 print(f"Loaded {len(cat_images)} cat images, shape: {cat_images.shape}")
 print(f"Loaded {len(dog_images)} dog images, shape: {dog_images.shape}")
@@ -98,8 +117,8 @@ with open(os.path.join(results_dir, "results_binary_models.txt"), "w") as f:
     f.write(f"  Test Accuracy: {cat_accuracy:.4f}\n")
 
 # Save models
-is_dog_model.save(os.path.join(models_dir, "IsDog_model.keras"))
-is_cat_model.save(os.path.join(models_dir, "IsCat_model.keras"))
+is_dog_model.save(os.path.join(models_dir, "IsDog_model_grayscale.keras"))
+is_cat_model.save(os.path.join(models_dir, "IsCat_model_grayscale.keras"))
 
 print(f"\nModels saved to {models_dir}/")
 print(f"Results saved to {results_dir}/results_binary_models.txt")
